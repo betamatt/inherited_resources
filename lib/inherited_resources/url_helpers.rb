@@ -142,17 +142,21 @@ module InheritedResources
 
       class_eval <<-URL_HELPERS, __FILE__, __LINE__
         protected
+          # Hook so that the objects used to generate routes can be modified
+          def url_helper_objects(*args)
+            args
+          end 
+            
           def #{prefix}#{name}_path(*given_args)
             given_options = given_args.extract_options!
-            #{prefix}#{segments}_path(#{ivars})
+            #{prefix}#{segments}_path(*url_helper_objects(#{ivars}))
           end
 
           def #{prefix}#{name}_url(*given_args)
             given_options = given_args.extract_options!
-            #{prefix}#{segments}_url(#{ivars})
+            #{prefix}#{segments}_url(*url_helper_objects(#{ivars}))
           end
       URL_HELPERS
     end
-
   end
 end
