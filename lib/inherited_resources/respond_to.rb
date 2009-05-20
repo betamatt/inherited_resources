@@ -35,6 +35,7 @@ module ActionController
 
         only_actions   = Array(options.delete(:only))
         except_actions = Array(options.delete(:except))
+        serializer_options = options.delete(:serializer_options)
 
         only_actions.map!{ |a| a.to_sym }
         except_actions.map!{ |a| a.to_sym }
@@ -43,6 +44,7 @@ module ActionController
           formats_hash[format.to_sym]          = {}
           formats_hash[format.to_sym][:only]   = only_actions   unless only_actions.empty?
           formats_hash[format.to_sym][:except] = except_actions unless except_actions.empty?
+          formats_hash[format.to_sym][:serializer_options] = serializer_options unless serializer_options.nil?
         end
 
         options.each do |format, actions|
@@ -135,11 +137,15 @@ module ActionController
             response.template.template_format = priority.to_sym
             response.content_type = priority.to_s
 
+
             if template_exists?
               render options.merge(:action => action_name)
               return true
             elsif object.respond_to?(:"to_#{priority.to_sym}")
-              render options.merge(:text => object.send(:"to_#{priority.to_sym}"))
+              format_hash = self.formats_for_respond_to[priority.to_sym]
+              format_options = format_hash[:serializer_options]
+              format_options = format_options.call(self, object) if format_options.is_a?(Proc)
+              render options.merge(:text => object.send(:"to_#{priority.to_sym}", format_options))
               return true
             end
           end
