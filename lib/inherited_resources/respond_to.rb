@@ -274,8 +274,11 @@ module ActionController
       # inherited_with_inheritable_attributes to insert formats_for_respond_to.
       # This usually happens only on Rails 2.3.
       #
-      if defined?(ApplicationController)
-        self.send(:inherited_with_inheritable_attributes, ApplicationController)
+      # Seems to cause problems with Rspec and helpers in Rails 2.1 (or possibly just certain rspec versions)
+      unless Rails::VERSION::MAJOR == 2 && Rails::VERSION::MINOR == 1
+        if defined?(ApplicationController)
+          self.send(:inherited_with_inheritable_attributes, ApplicationController)
+        end
       end
 
   end
