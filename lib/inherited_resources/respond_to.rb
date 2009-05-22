@@ -36,7 +36,7 @@ module ActionController
         only_actions   = Array(options.delete(:only))
         except_actions = Array(options.delete(:except))
         serializer_options = options.delete(:serializer_options)
-
+        
         only_actions.map!{ |a| a.to_sym }
         except_actions.map!{ |a| a.to_sym }
 
@@ -144,7 +144,13 @@ module ActionController
             elsif object.respond_to?(:"to_#{priority.to_sym}")
               format_hash = self.formats_for_respond_to[priority.to_sym]
               format_options = format_hash[:serializer_options]
-              format_options = format_options.call(self, object) if format_options.is_a?(Proc)
+              if format_options.is_a?(Proc)
+                # Options were passed as a proc that will result in the options hash
+                format_options = format_options.call(self, object)
+              elsif format_options.is_a?(Symbol)
+                # Options were passed as the name of an instance method that returns the options hash
+                format_options = self.send(format_options)
+              end
               render options.merge(:text => object.send(:"to_#{priority.to_sym}", format_options))
               return true
             end
