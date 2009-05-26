@@ -149,7 +149,7 @@ module ActionController
                 format_options = format_options.call(self, object)
               elsif format_options.is_a?(Symbol)
                 # Options were passed as the name of an instance method that returns the options hash
-                format_options = self.send(format_options)
+                format_options = self.send(format_options, object)
               end
               render options.merge(:text => object.send(:"to_#{priority.to_sym}", format_options))
               return true
