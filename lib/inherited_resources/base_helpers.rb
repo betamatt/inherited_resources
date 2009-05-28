@@ -42,11 +42,11 @@ module InheritedResources
       end
 
       # This method is responsable for building the object on :new and :create
-      # methods. You probably won't need to change it. Again, if you overwrite
-      # don't forget to cache the result in an instance_variable.
+      # methods. If you overwrite it, don't forget to cache the result in an
+      # instance variable.
       #
-      def build_resource(attributes = {})
-        get_resource_ivar || set_resource_ivar(end_of_association_chain.send(method_for_build, attributes))
+      def build_resource
+        get_resource_ivar || set_resource_ivar(end_of_association_chain.send(method_for_build, params[resource_instance_name]))
       end
 
       # This class allows you to set a instance variable to begin your
@@ -129,7 +129,14 @@ module InheritedResources
       # Returns the appropriated method to build the resource.
       #
       def method_for_build #:nodoc:
-        (begin_of_association_chain || parent?) ? :build : :new
+        (begin_of_association_chain || parent?) ? method_for_association_build : :new
+      end
+
+      # Returns the name of the method used for build the resource in cases
+      # where we have a parent. This is overwritten in singleton scenarios.
+      #
+      def method_for_association_build
+        :build
       end
 
       # Returns the name of the method to be called, before returning the end
