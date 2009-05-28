@@ -151,7 +151,7 @@ module ActionController
                 # Options were passed as the name of an instance method that returns the options hash
                 format_options = self.send(format_options, object)
               end
-              render options.merge(:text => object.send(:"to_#{priority.to_sym}", format_options))
+              render options.merge(:text => object.send(:"to_#{priority.to_sym}", format_options || {}))
               return true
             end
           end
